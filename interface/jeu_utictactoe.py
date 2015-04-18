@@ -54,11 +54,17 @@ class Fenetre(Tk):
     """
         À completer !.
     """
-    def __init__(self):
+    def __init__(self, joueur1, joueur2, pion1, pion2, force):
         """
             À completer !.
         """
         super().__init__()
+
+        self.joueur1 = joueur1
+        self.joueur2 = joueur2
+        self.pion1 = pion1
+        self.pion2 = pion2
+        self.force = force
 
         # Nom de la fenêtre.
         self.title("Ultimate Tic-Tac-Toe")
@@ -69,9 +75,9 @@ class Fenetre(Tk):
         # Un ditionnaire contenant les 9 canvas des 9 plateaux du jeu
         self.canvas_uplateau = {}
 
-		# Bouton pour quitter le match
+        # Bouton pour quitter le match
         Button(self.canvas_uplateau, text = 'Quitter', command = self.quit).grid(row = 5, column = 4, sticky = E)
-		
+
         # Création des frames et des canvas du jeu
         for i in range(0, 3):
             for j in range(0, 3):
@@ -86,14 +92,6 @@ class Fenetre(Tk):
         self.messages = Label(self)
         self.messages.grid(columnspan=3)
 
-        # Création de deux joueurs. Ce code doit être bien sûr modifié,
-        # car il faut chercher ces infos dans les widgets de la fenêtre.
-        # Vous pouvez également déplacer ce code dans une autre méthode selon votre propre solution.
-        #p1 = Joueur("VotreNom", "Personne", 'X')
-        #p2 = Joueur("Colosse", "Ordinateur", 'O')
-        #self.partie.joueurs = [p1,p2]
-        #self.partie.joueur_courant = p1
-
         # Centrer la fenêtre. Détermine la taille de la fenêtre.
         self.width_fen, self.height_fen = 670, 800
         centreFen(self, self.width_fen, self.height_fen)
@@ -102,9 +100,9 @@ class Fenetre(Tk):
         """
             À completer !.
         """
-        print (self.partie.joueur_courant.nom)
-		
-		
+        #print (self.partie.joueur_courant.nom)
+
+
         try:
             # On trouve le numéro de ligne/colonne en divisant par le nombre de pixels par case.
             # event.widget représente ici un des 9 canvas !
@@ -153,7 +151,7 @@ class Fenetre(Tk):
 
         except ErreurChoixCase as e:
             messagebox.showerror ("Erreur", str(e))
-	
+
     def desactiver_plateau(self, ligne, colonne):
 
         for i in range(0, 3):
