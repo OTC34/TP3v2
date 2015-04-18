@@ -153,6 +153,7 @@ class fen_info(Tk):
         Démarrer la partie avec les informations saisie. Afficher le plateau
         """
         if self.choixJoueur.get()==1:
+            type2 = "Ordinateur"
             if self.nom_joueur1:
                 j1 = self.nom_joueur1.get()
                 j2 = "Colosse"
@@ -160,6 +161,7 @@ class fen_info(Tk):
                 j1 = "Joueur 1"
                 j2 = "Colosse"
         elif self.choixJoueur.get()==2:
+            type2 = "Personne"
             if self.nom_joueur1 and self.nom_joueur2:
                 j1 = self.nom_joueur1.get()
                 j2 = self.nom_joueur2.get()
@@ -174,7 +176,7 @@ class fen_info(Tk):
         p2 = self.pion2
         force = self.choixForce.get()
         self.destroy()
-        ma_fenetre = Fenetre(j1, j2, p1, p2, force)
+        ma_fenetre = Fenetre(j1, j2, type2, p1, p2, force)
         ma_fenetre.mainloop()
 
 

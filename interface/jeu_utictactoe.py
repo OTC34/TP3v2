@@ -54,17 +54,11 @@ class Fenetre(Tk):
     """
         À completer !.
     """
-    def __init__(self, joueur1, joueur2, pion1, pion2, force):
+    def __init__(self, joueur1, joueur2, type2, pion1, pion2, force):
         """
             À completer !.
         """
         super().__init__()
-
-        self.joueur1 = joueur1
-        self.joueur2 = joueur2
-        self.pion1 = pion1
-        self.pion2 = pion2
-        self.force = force
 
         # Nom de la fenêtre.
         self.title("Ultimate Tic-Tac-Toe")
@@ -95,6 +89,13 @@ class Fenetre(Tk):
         # Centrer la fenêtre. Détermine la taille de la fenêtre.
         self.width_fen, self.height_fen = 670, 800
         centreFen(self, self.width_fen, self.height_fen)
+
+        # Initialiser les joueurs en créant des classes Joueur avec nom, type et pion.
+        p1 = Joueur(joueur1, "Personne", pion1)
+        p2 = Joueur(joueur2, type2, pion2)
+        #self.force = force
+        self.partie.joueurs = [p1,p2]
+        self.partie.joueur_courant = p1
 
     def selectionner(self, event):
         """
