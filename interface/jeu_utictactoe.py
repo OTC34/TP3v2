@@ -70,12 +70,21 @@ class Fenetre(Tk):
         self.canvas_uplateau = {}
 
         # Bouton pour quitter le match
-        Button(self.canvas_uplateau, text = 'Quitter', command = self.quit).grid(row = 5, column = 4, sticky = E)
+        Button(self.canvas_uplateau, text = 'Quitter', command = self.quit).grid(row = 20, column = 1, sticky = E)
+
+        # Étiquette d'information sur les joueurs, les pions et le joueur courant.
+        self.label_info = Label(text="Joueur 1= {} - Pion = {} | Joueur 2= {} - Pion = {}"
+                                .format(joueur1, pion1, joueur2, pion2))
+        self.label_info.grid(row=0, columnspan=3, padx=5, pady=5)
+
+        # Création d'un frame qui contient le plateau de jeu
+        self.frame_plateau = Frame(self)
+        self.frame_plateau.grid(row = 10, column=0)
 
         # Création des frames et des canvas du jeu
         for i in range(0, 3):
             for j in range(0, 3):
-                cadre = Frame(self, borderwidth=5, relief=GROOVE)
+                cadre = Frame(self.frame_plateau, borderwidth=5, relief=GROOVE)
                 cadre.grid(row=i, column=j, padx=5, pady=5)
                 self.canvas_uplateau[i,j] = CanvasPlateau(cadre, self.partie.uplateau[i,j])
                 self.canvas_uplateau[i,j].grid()
@@ -87,7 +96,7 @@ class Fenetre(Tk):
         self.messages.grid(columnspan=3)
 
         # Centrer la fenêtre. Détermine la taille de la fenêtre.
-        self.width_fen, self.height_fen = 670, 800
+        self.width_fen, self.height_fen = cadre.winfo_width()*3, 800
         centreFen(self, self.width_fen, self.height_fen)
 
         # Initialiser les joueurs en créant des classes Joueur avec nom, type et pion.

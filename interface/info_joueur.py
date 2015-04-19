@@ -19,6 +19,7 @@ class fen_info(Tk):
     def __init__(self):
 
         super().__init__()
+        # Initialisation des pions à la valeur initiale.
         self.pion1 = "X"
         self.pion2 = "O"
 
@@ -79,15 +80,15 @@ class fen_info(Tk):
         Label(self.f_j2, text="Nom joueur 2").grid(row=1, column=0, sticky=E, padx = 5, pady = 5)
         self.nom_joueur2 = Entry(self.f_j2, state="disabled")
         self.nom_joueur2.grid(row=1, column=1)
-        self.label_pion2 = Label(self.f_j2, text="Pion Joueur 2: O")
+        self.label_pion2 = Label(self.f_j2, text="Pion Joueur 2 = O")
         self.label_pion2.grid(row=1, column=2, padx=5)
 
         # Information sur l'ordinateur. Disparaît si on choisi 2 joueurs.
         self.f_ordi = Frame(self, width=420, borderwidth=1, padx=5, pady=5, relief=SUNKEN)
         self.f_ordi.grid(row=40, columnspan=5, padx=5, pady=5)
-        Label(self.f_ordi, text="Nom de l'ordinateur: Colosse", font=("Arial", 12), fg="#0080FF")\
+        Label(self.f_ordi, text="Ordinateur = Colosse", font=("Arial", 12), fg="#0080FF")\
             .grid(row=1, column=0, sticky=E, padx = 5, pady = 5)
-        self.pion_ordi = Label(self.f_ordi, text="Pion de l'ordinateur: O",
+        self.pion_ordi = Label(self.f_ordi, text="| Pion de l'ordinateur = O",
                                font=("Arial", 12), fg="#0080FF")
         self.pion_ordi.grid(row=1, column=2)
         separateur(20).grid(row=50,columnspan=5)
@@ -140,13 +141,13 @@ class fen_info(Tk):
         if self.sel_pion.get()==1:
             self.pion1="X"
             self.pion2="O"
-            self.label_pion2["text"]="Pion Joueur 2: {}".format(self.pion2)
-            self.pion_ordi["text"]="Pion de l'ordinateur: {}".format(self.pion2)
+            self.label_pion2["text"]="Pion Joueur 2 = {}".format(self.pion2)
+            self.pion_ordi["text"]="| Pion de l'ordinateur = {}".format(self.pion2)
         else:
             self.pion1="O"
             self.pion2="X"
-            self.label_pion2["text"]="Pion Joueur 2: {}".format(self.pion2)
-            self.pion_ordi["text"]="Pion de l'ordinateur: {}".format(self.pion2)
+            self.label_pion2["text"]="Pion Joueur 2 = {}".format(self.pion2)
+            self.pion_ordi["text"]="| Pion de l'ordinateur = {}".format(self.pion2)
 
     def demarrer_jeu(self):
         """
@@ -154,7 +155,7 @@ class fen_info(Tk):
         """
         if self.choixJoueur.get()==1:
             type2 = "Ordinateur"
-            if self.nom_joueur1:
+            if self.nom_joueur1.get()!='':
                 j1 = self.nom_joueur1.get()
                 j2 = "Colosse"
             else:
@@ -162,12 +163,18 @@ class fen_info(Tk):
                 j2 = "Colosse"
         elif self.choixJoueur.get()==2:
             type2 = "Personne"
-            if self.nom_joueur1 and self.nom_joueur2:
+            if self.nom_joueur1.get()!='' and self.nom_joueur2.get()!='':
                 j1 = self.nom_joueur1.get()
                 j2 = self.nom_joueur2.get()
-            elif not self.nom_joueur1:
+            elif self.nom_joueur1.get()=='':
                 j1 = "Joueur 1"
-                if not self.nom_joueur2:
+                if self.nom_joueur2.get()=='':
+                    j2 = "Joueur 2"
+                else:
+                    j2 = self.nom_joueur2.get()
+            else:
+                j1 = self.nom_joueur1.get()
+                if self.nom_joueur2.get()=='':
                     j2 = "Joueur 2"
                 else:
                     j2 = self.nom_joueur2.get()
