@@ -57,7 +57,10 @@ class Fenetre(Tk):
     def __init__(self, joueur1, joueur2, type2, pion1, pion2, force):
         """
             À completer !.
+        :param joueur1, joueur2, type2, pion1, pion2, force
         """
+        self.type2 = type2
+
         super().__init__()
 
         # Nom de la fenêtre.
@@ -66,16 +69,24 @@ class Fenetre(Tk):
         # La partie de ultimate Tic-Tac-Toe
         self.partie = Partie()
 
+        # Initialiser les joueurs en créant des classes Joueur avec nom, type et pion.
+        p1 = Joueur(joueur1, "Personne", pion1)
+        p2 = Joueur(joueur2, type2, pion2)
+        #self.force = force
+        self.partie.joueurs = [p1,p2]
+        self.partie.joueur_courant = p1
+
         # Un ditionnaire contenant les 9 canvas des 9 plateaux du jeu
         self.canvas_uplateau = {}
 
         # Bouton pour quitter le match
-        Button(self.canvas_uplateau, text = 'Quitter', command = self.quit).grid(row = 20, column = 1, sticky = E)
+        Button(self.canvas_uplateau, text = 'Quitter', command = self.quit).grid(row = 20, column = 0, sticky = E)
 
         # Étiquette d'information sur les joueurs, les pions et le joueur courant.
-        self.label_info = Label(text="Joueur 1= {} - Pion = {} | Joueur 2= {} - Pion = {}"
-                                .format(joueur1, pion1, joueur2, pion2))
-        self.label_info.grid(row=0, columnspan=3, padx=5, pady=5)
+        Label(text="Joueur 1 = {} : Pion = {} | Joueur 2 = {} : Pion = {}"
+                                .format(joueur1, pion1, joueur2, pion2)).grid(row=0, columnspan=3, padx=5, pady=5)
+        self.label_joueur_courant = Label(text="À votre tour {}".format(p1.nom), font=("Arial", 14), fg="#0080FF")
+        self.label_joueur_courant.grid(row=1, columnspan=3, padx=5, pady=5)
 
         # Création d'un frame qui contient le plateau de jeu
         self.frame_plateau = Frame(self)
@@ -96,15 +107,8 @@ class Fenetre(Tk):
         self.messages.grid(columnspan=3)
 
         # Centrer la fenêtre. Détermine la taille de la fenêtre.
-        self.width_fen, self.height_fen = cadre.winfo_width()*3, 800
+        self.width_fen, self.height_fen = 670, 800
         centreFen(self, self.width_fen, self.height_fen)
-
-        # Initialiser les joueurs en créant des classes Joueur avec nom, type et pion.
-        p1 = Joueur(joueur1, "Personne", pion1)
-        p2 = Joueur(joueur2, type2, pion2)
-        #self.force = force
-        self.partie.joueurs = [p1,p2]
-        self.partie.joueur_courant = p1
 
     def selectionner(self, event):
         """
@@ -144,14 +148,18 @@ class Fenetre(Tk):
                     if event.widget.plateau.est_gagnant(self.partie.joueur_courant.pion):
                         raise EstGagnant (" Bravo {}, Vous avez gagné un plateau !!!".format (self.partie.joueur_courant.nom))
             except EstGagnant as e:
-                messagebox.showwarning("Terminé", str(e))
+                messagebox.showinfo("Partie terminée", str(e))
 
             # Changer le joueur courant.
             # Vous pouvez modifier ou déplacer ce code dans une autre méthode selon votre propre solution.
-            if self.partie.joueur_courant == self.partie.joueurs[0]:
-                self.partie.joueur_courant = self.partie.joueurs[1]
-            else:
-                self.partie.joueur_courant = self.partie.joueurs[0]
+            if self.partie.joueur_courant.type == "Personne":
+                if self.partie.joueur_courant == self.partie.joueurs[0]:
+                    self.partie.joueur_courant = self.partie.joueurs[1]
+                else:
+                    self.partie.joueur_courant = self.partie.joueurs[0]
+
+            # Modification au libellé pour afficher joueur courant
+            self.label_joueur_courant["text"]="À votre tour {}".format(self.partie.joueur_courant.nom)
 
             # Effacer le contenu du widget (canvas) et du plateau (dictionnaire) quand ce dernier devient plein.
             # Vous pouvez modifier ou déplacer ce code dans une autre méthode selon votre propre solution.
@@ -187,3 +195,13 @@ class Fenetre(Tk):
         self.messages['foreground'] = 'black'
         self.messages['text'] = message
 
+    def afficher_joueur_courant(self, joueur_courant):
+        """
+            Définition du texte à afficher pour le libellé label_joueur_courant
+        :param joueur_courant:
+        :return: Text à afficher pour le libellé label_joueur_courant
+        """
+        if self.partie=="Ordinateur":
+            text = "Au tour de Colosse"
+        else:
+            text = "À votre tour {}".format(self.partie.joueur_courant)

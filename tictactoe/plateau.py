@@ -143,35 +143,168 @@ class Plateau:
         assert isinstance(pion, str), "Plateau: pion doit être une chaîne de caractères."
         assert pion in ["O", "X"], "Plateau: pion doit être 'O' ou 'X'."
 
-        if pion == "X":
-            pion_adverse = "O"
+        self.pion = pion
+        self.good = False
+        self.combines = []
+        difficulty = 90
+        i , j, k = 0 , 0 , 0
+        valide = False
+        liste_possibilite_2 = []
+        liste_possibilite_2_adv = []
+        liste_possibilite_1 = []
+        liste_possibilite_1_adv = []
+        liste_vides = []
+
+        #procédure qui créer une liste des lignes, colonnes et diagonales actuelles servant à comparer et
+        #à permettre à l'ordinateur de savoir où placer son pion.
+
+        for l in range(0,3):
+            lignePion = ''
+            for c in range(0,3):
+                lignePion += self.cases[(l,c)].contenu
+            self.combines.append(lignePion)
+        for c in range(0,3):
+            lignePion = ''
+            for l in range(0,3):
+                lignePion += self.cases[(l,c)].contenu
+            self.combines.append(lignePion)
+        lignePion = ''
+        l = 3
+        for c in range(0,3):
+            l -= 1
+            lignePion += self.cases[(l,c)].contenu
+        self.combines.append(lignePion)
+        lignePion = ''
+        for cl in range(0,3):
+            lignePion += self.cases[(cl,cl)].contenu
+        self.combines.append(lignePion)
+
+        # Création d'une liste de toutes les cases vides
+        for i in range(0,3):
+            for j in range(0,3):
+                if self.cases[(i,j)].est_vide():
+                    liste_vides.append(i, j)
+
+        if self.pion == "O":
+            self.pion2 = "X"
         else:
-            pion_adverse = "X"
+            self.pion2 = "O"
 
-        # Chercher si l'ordi ou l'adversaire peuvent gagner en choisissant une case.
-        # Dans ce cas, on retourne les coordonnées de cette case!
-        for i in range(0, 3):
-            for j in range(0, 3):
-                if self.position_valide(i, j):
-                    self.selectionner_case(i, j, pion)
-                    # Chercher si l'ordi peut gagner en jouant cette case !
-                    if self.est_gagnant(pion):
-                        self.cases[(i,j)].contenu = " "
-                        return i, j
-                    self.cases[(i,j)].contenu = " "
-                    self.selectionner_case(i, j, pion_adverse)
-                    # Chercher si l'adversaire peut gagner en jouant cette case !
-                    if self.est_gagnant(pion_adverse):
-                        self.cases[(i,j)].contenu = " "
-                        return i, j
-                    self.cases[(i,j)].contenu = " "
+        #procédure permettant de définir la force de l'ordinateur selon la difficulté. Si le nombre est compris entre
+        #0 et le niveau difficulté, l'ordinateur sera fort. Si le nombre est compris entre le niveau de difficulté
+        #et 100 l'ordinateur joueura n'importe quelle case sans tenir compte d'une possible victoire ou défaite.
 
-        # Sinon, retourner au hasard une case parmi celles qui sont vides !
-        liste = []
-        for i in range(0, 3):
-            for j in range(0, 3):
-                if self.cases[i,j].est_vide():
-                    liste += [(i,j)]
+        brain = randrange (0,100)
+        if brain <= difficulty:
+            self.good = True
 
-        irand = randrange(0,len(liste))
-        return liste[irand]
+        if self.good:
+            for combine in self.combines: #parcours chaque combine possible
+                if i <= 2: #parcours les lignes
+                    if combine.replace(" ","") == self.pion * 2:
+                        for j in range(0,3):
+                            if self.cases[(i,j)].est_vide():
+                                liste_possibilite_2.append = (i, j)
+                    elif combine.replace(" ","") == self.pion2 * 2:
+                        for j in range(0,3):
+                            if self.cases[(i,j)].est_vide():
+                                liste_possibilite_2_adv.append = (i, j)
+                elif i > 2 and i <= 5: #parcours les colonnes
+                    if combine.replace(" ","") == self.pion * 2:
+                        for j in range(0,3):
+                            if self.cases[(j,k)].est_vide():
+                                liste_possibilite_2.append = (j, k)
+                    elif combine.replace(" ","") == self.pion2 * 2 and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,k)].est_vide():
+                                liste_possibilite_2_adv.append = (j, k)
+                    k += 1
+                elif i == 6: #parcours la première diagonale
+                    l = 3
+                    if combine.replace(" ","") == self.pion * 2 and not valide:
+                        for j in range(0,3):
+                            l -= 1
+                            if self.cases[(j,l)].est_vide():
+                                liste_possibilite_2.append = (j, l)
+                    l = 3
+                    if combine.replace(" ","") == self.pion2 * 2 and not valide:
+                        for j in range(0,3):
+                            l -= 1
+                            if self.cases[(j,l)].est_vide():
+                                liste_possibilite_2_adv.append = (j, l)
+                elif i == 7: #parcours la deuxième diagonale
+                    if combine.replace(" ","") == self.pion * 2 and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,j)].est_vide():
+                                liste_possibilite_2.append = (j, j)
+                    if combine.replace(" ","") == self.pion2 * 2 and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,j)].est_vide():
+                                liste_possibilite_2_adv.append = (j, j)
+                i += 1
+            i , j, k = 0 , 0 , 0
+            for combine in self.combines: #parcours chaque combine possible
+                if i <= 2: #parcours les lignes
+                    if combine.replace(" ","") == self.pion and not valide:
+                        for j in range(0,3):
+                            if self.cases[(i,j)].est_vide():
+                                liste_possibilite_1.append = (i, j)
+                    elif combine.replace(" ","") == self.pion2 and not valide:
+                        for j in range(0,3):
+                            if self.cases[(i,j)].est_vide():
+                                liste_possibilite_1_adv.append = (i, j)
+                elif i > 2 and i <= 5: #parcours les colonnes
+                    if combine.replace(" ","") == self.pion and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,k)].est_vide():
+                                liste_possibilite_1.append = (j, k)
+                    elif combine.replace(" ","") == self.pion2 and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,k)].est_vide():
+                                liste_possibilite_1_adv.append = (j, k)
+                    k += 1
+                elif i == 6: #parcours la première diagonale
+                    l = 3
+                    if combine.replace(" ","") == self.pion * 2 and not valide:
+                        for j in range(0,3):
+                            l -= 1
+                            if self.cases[(j,l)].est_vide():
+                                liste_possibilite_1.append = (j, l)
+                    l = 3
+                    if combine.replace(" ","") == self.pion2 * 2 and not valide:
+                        for j in range(0,3):
+                            l -= 1
+                            if self.cases[(j,l)].est_vide():
+                                liste_possibilite_1_adv.append = (j, l)
+                elif i == 7: #parcours la deuxième diagonale
+                    if combine.replace(" ","") == self.pion and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,j)].est_vide():
+                                liste_possibilite_1.append = (j, j)
+                    if combine.replace(" ","") == self.pion2 and not valide:
+                        for j in range(0,3):
+                            if self.cases[(j,j)].est_vide():
+                                liste_possibilite_1_adv.append = (j, j)
+                i += 1
+            # Vérifie à travers les possibilités celle qui est la plus
+            # avantageuse et renvoie les coordonnées de la case.
+            if liste_possibilite_2:
+                irand = randrange(0, len(liste_possibilite_2))
+                ligne, colonne = liste_possibilite_2[irand]
+            elif liste_possibilite_2_adv:
+                irand = randrange(0, len(liste_possibilite_2_adv))
+                ligne, colonne = liste_possibilite_2[irand]
+            elif liste_possibilite_1:
+                irand = randrange(0, len(liste_possibilite_1))
+                ligne, colonne = liste_possibilite_1[irand]
+            elif liste_possibilite_1_adv:
+                irand = randrange(0, len(liste_possibilite_1_adv))
+                ligne, colonne = liste_possibilite_1_adv[irand]
+            else:
+                irand = randrange(0, len(liste_vides))
+                ligne, colonne = liste_vides[irand]
+        else:
+            irand = randrange(0, len(liste_vides))
+            ligne, colonne = liste_vides[irand]
+
+        return ligne , colonne

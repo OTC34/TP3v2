@@ -18,7 +18,7 @@ def centreFen(fen, w=200, h=200):
 
     assert isinstance(fen, object),"Doit être une classe fenêtre"
 
-    # calculer la grandeur de la fenêtre
+    # calculer la grandeur de l'écran
 
     ws = fen.winfo_screenwidth()
     hs = fen.winfo_screenheight()

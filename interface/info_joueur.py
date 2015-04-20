@@ -105,10 +105,10 @@ class fen_info(Tk):
         self.f3 = Radiobutton(self, indicatoron=0, width = 20,
                          padx = 20, text="Difficile", variable=self.choixForce, value=3, command=self.define_choix)
         self.f3.grid(row=62, columnspan=5)
-        separateur(20).grid(row=70, column=0)
+        separateur(40).grid(row=70, column=0)
 
         #Button pour démarrer la partie
-        self.bt_start = Button(text="Démarrer", command=self.demarrer_jeu)
+        self.bt_start = Button(text="Démarrer", font=("Arial", 12), fg="green", command=self.demarrer_jeu)
         self.bt_start.grid(row=80, columnspan=5)
 
     def define_choix(self):
