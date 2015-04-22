@@ -38,7 +38,7 @@ class fen_info(Tk):
 
         # Création d'un canvas avec l'image "logo.gif"
         canvas = Canvas(self, width=280, height=100)
-        self.img = PhotoImage(file="interface\logo.gif")
+        self.img = PhotoImage(file="logo.gif")
         canvas.create_image(280, 100, anchor=SE, image=self.img)
         canvas.grid(row=0, columnspan=5, pady=10)
 

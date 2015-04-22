@@ -8,12 +8,8 @@ from tkinter import Tk, Canvas, Label, Entry, Checkbutton, IntVar, Frame, GROOVE
 from tictactoe.partie import Partie
 from tictactoe.joueur import Joueur
 from modules.ModulesPerso import centreFen
+from modules.gestionErr import ErreurChoixCase, EstGagnant
 
-class ErreurChoixCase(Exception):
-    pass
-
-class EstGagnant(Exception):
-    pass
 
 class CanvasPlateau(Canvas):
     """
@@ -29,7 +25,7 @@ class CanvasPlateau(Canvas):
 
         # Appel du constructeur de la classe de base (Canvas).
         super().__init__(parent, width=self.plateau.n_lignes * taille_case,
-                         height=self.plateau.n_colonnes * self.taille_case)
+                         height=self.plateau.n_colonnes * self.taille_case, borderwidth=2, bg="grey")
 
         # Dessiner le plateau du jeu ultimate Tic-Tac-Toe.
         self.dessiner_plateau()
@@ -37,7 +33,7 @@ class CanvasPlateau(Canvas):
 
     def dessiner_plateau(self):
         """
-            À completer !.
+            Fonction qui créer les 9 carrés de jeu compris à l'intérieur des 9 plateaux de jeu.
         """
         for i in range(self.plateau.n_lignes):
             for j in range(self.plateau.n_colonnes):
@@ -49,7 +45,6 @@ class CanvasPlateau(Canvas):
                 self.create_rectangle(debut_colonne, debut_ligne, fin_colonne, fin_ligne,
                                       fill='#e1e1e1', width = 2, outline = "white")
 
-
 class Fenetre(Tk):
     """
         À completer !.
@@ -60,6 +55,7 @@ class Fenetre(Tk):
         :param joueur1, joueur2, type2, pion1, pion2, force
         """
         self.type2 = type2
+        self.force_ordi = force
 
         super().__init__()
 
@@ -76,52 +72,52 @@ class Fenetre(Tk):
         self.partie.joueurs = [p1,p2]
         self.partie.joueur_courant = p1
 
-        # Un ditionnaire contenant les 9 canvas des 9 plateaux du jeu
+        # Un dictionnaire contenant les 9 canvas des 9 plateaux du jeu
         self.canvas_uplateau = {}
 
         # Bouton pour quitter le match
-        Button(self.canvas_uplateau, text = 'Quitter', command = self.quit).grid(row = 20, column = 0, sticky = E)
+        Button(self.canvas_uplateau, text = 'Quitter', command = self.destroy).grid(row = 20, column = 0, sticky = E)
 
         # Étiquette d'information sur les joueurs, les pions et le joueur courant.
-        Label(text="Joueur 1 = {} : Pion = {} | Joueur 2 = {} : Pion = {}"
-                                .format(joueur1, pion1, joueur2, pion2)).grid(row=0, columnspan=3, padx=5, pady=5)
         self.label_joueur_courant = Label(text="À votre tour {}".format(p1.nom), font=("Arial", 14), fg="#0080FF")
         self.label_joueur_courant.grid(row=1, columnspan=3, padx=5, pady=5)
+		
+        # Étiquette des statistiques des parties gagnées par chaque joueur initialisées à zéro
+        self.label_stat = Label(text="Plateaux gagnées: \n\n{} : {}\n{} : {}"\
+                                .format(joueur1, 0, joueur2, 0))
+        self.label_stat.grid(row = 10, column =1)
 
-        # Création d'un frame qui contient le plateau de jeu
-        self.frame_plateau = Frame(self)
-        self.frame_plateau.grid(row = 10, column=0)
-
-        # Création des frames et des canvas du jeu
-        for i in range(0, 3):
-            for j in range(0, 3):
-                cadre = Frame(self.frame_plateau, borderwidth=5, relief=GROOVE)
-                cadre.grid(row=i, column=j, padx=5, pady=5)
-                self.canvas_uplateau[i,j] = CanvasPlateau(cadre, self.partie.uplateau[i,j])
-                self.canvas_uplateau[i,j].grid()
-                # On lie un clic sur le Canvas à une méthode.
-                self.canvas_uplateau[i,j].bind('<Button-1>', self.selectionner)
+        # Appel de la méthode qui dessine le plateau de Tic-Tac-Toe Ultime
+        self.dessiner_canvas(self)
 
         # Ajout d'une étiquette d'information.
         self.messages = Label(self)
         self.messages.grid(columnspan=3)
 
         # Centrer la fenêtre. Détermine la taille de la fenêtre.
-        self.width_fen, self.height_fen = 670, 800
+        self.width_fen, self.height_fen = 740, 750
         centreFen(self, self.width_fen, self.height_fen)
 
     def selectionner(self, event):
         """
-            À completer !.
+            Permet de dessiner le pion dans la case sélectionnée.
         """
-        #print (self.partie.joueur_courant.nom)
 
+        self.reinitialise = False
 
-        try:
+        # Faire joueur l'ordinateur si le joueur courant est l'ordinateur. Définir ligne et colonne
+        # selon le choix de l'ordinateur. Si joueur est une personne, la ligne et la colonne vient
+        # des coordonnées de l'événement créé par le clic de la souris.
+        if self.partie.joueur_courant.type == "Ordinateur":
+            pion = self.partie.joueur_courant.pion
+            ligne, colonne = event.widget.plateau.choisir_prochaine_case(pion, self.force_ordi)
+        else:
             # On trouve le numéro de ligne/colonne en divisant par le nombre de pixels par case.
             # event.widget représente ici un des 9 canvas !
             ligne = event.y // event.widget.taille_case
             colonne = event.x // event.widget.taille_case
+
+        try:
 
             if not self.partie.uplateau[event.widget.plateau.cordonnees_parent].cases[ligne, colonne].est_vide():
                 raise ErreurChoixCase ("La case est déjà sélectionné !")
@@ -145,18 +141,31 @@ class Fenetre(Tk):
 
             try:
                 # On vérifie si le joueur courant est gagnant
-                    if event.widget.plateau.est_gagnant(self.partie.joueur_courant.pion):
-                        raise EstGagnant (" Bravo {}, Vous avez gagné un plateau !!!".format (self.partie.joueur_courant.nom))
+                if event.widget.plateau.est_gagnant(self.partie.joueur_courant.pion):
+                    self.partie.joueur_courant.nb_parties_gagnees +=1
+                    raise EstGagnant (" Bravo {}, Vous avez gagné un plateau !!!".format (self.partie.joueur_courant.nom))
             except EstGagnant as e:
                 messagebox.showinfo("Partie terminée", str(e))
 
+                # affichage des statistiques
+                self.label_stat = Label(text="Plateaux gagnées:\n\n{} :{}\n{} :{}"\
+                        .format(self.partie.joueurs[0].nom, self.partie.joueurs[0].nb_parties_gagnees,
+                                self.partie.joueurs[1].nom, self.partie.joueurs[1].nb_parties_gagnees))
+                self.label_stat.grid(row = 10, column =1)
+
+                # Partie terminée, redémarrer ou quitter.
+                if messagebox.askyesno("Continuer", "Voulez-vous continuer?",):
+                    self.vider_plateau(event)
+                    self.reinitialise = True
+                else:
+                    self.destroy()
+
             # Changer le joueur courant.
             # Vous pouvez modifier ou déplacer ce code dans une autre méthode selon votre propre solution.
-            if self.partie.joueur_courant.type == "Personne":
-                if self.partie.joueur_courant == self.partie.joueurs[0]:
-                    self.partie.joueur_courant = self.partie.joueurs[1]
-                else:
-                    self.partie.joueur_courant = self.partie.joueurs[0]
+            if self.partie.joueur_courant == self.partie.joueurs[0]:
+                self.partie.joueur_courant = self.partie.joueurs[1]
+            else:
+                self.partie.joueur_courant = self.partie.joueurs[0]
 
             # Modification au libellé pour afficher joueur courant
             self.label_joueur_courant["text"]="À votre tour {}".format(self.partie.joueur_courant.nom)
@@ -167,26 +176,31 @@ class Fenetre(Tk):
                 event.widget.delete('pion')
                 event.widget.plateau.initialiser()
 
+            # Appel de la procédure qui désactive les 8 autres plateaux
+            if not self.reinitialise:
+                self.desactiver_plateau(ligne, colonne)
+
         except ErreurChoixCase as e:
             messagebox.showerror ("Erreur", str(e))
 
     def desactiver_plateau(self, ligne, colonne):
+        """
+            Procédure qui active le plateau où le jeu doit se jouer et désactive les 8 autres plateaux.
+
+        :param ligne: No. de la ligne du plateau à ne pas désactiver
+        :param colonne: No. de la colonne du plateau à ne pas désactiver
+        :return: None
+        """
 
         for i in range(0, 3):
             for j in range(0, 3):
                 if i != ligne or j != colonne:
-                    self.canvas_uplateau[i,j]['borderwidth'] = 2
-                    self.canvas_uplateau[i,j]['background'] = '#e1e1e1'
+                    self.canvas_uplateau[i,j]['background'] = 'white'
                     self.canvas_uplateau[i,j].unbind('<Button-1>')
 
                 else:
-
-                    self.canvas_uplateau[i,j]['borderwidth'] = 2
-                    self.canvas_uplateau[i,j]['background'] = 'blue'
+                    self.canvas_uplateau[i,j]['background'] = '#0080FF'
                     self.canvas_uplateau[ligne, colonne].bind('<Button-1>', self.selectionner)
-
-    def activer_plateau(self):
-        self.canvas_uplateau[0,0].bind('<Button-1>'.self.selectionner)
 
     def afficher_message(self, message):
         """
@@ -204,4 +218,31 @@ class Fenetre(Tk):
         if self.partie=="Ordinateur":
             text = "Au tour de Colosse"
         else:
-            text = "À votre tour {}".format(self.partie.joueur_courant)
+            text = "À votre tour {}".format(self.partie.joueur_courant.nom)
+
+    def vider_plateau(self,event):
+
+        self.partie.initialiser()
+        self.frame_plateau.destroy()
+        self.dessiner_canvas(self)
+        for i in range(0, 3):
+            for j in range(0, 3):
+                self.canvas_uplateau[i,j]['bg']="grey"
+                self.canvas_uplateau[i,j].bind('<Button-1>')
+
+
+    def dessiner_canvas(self, parent):
+
+        # Création d'un frame qui contient le plateau de jeu
+        self.frame_plateau = Frame(parent)
+        self.frame_plateau.grid(row = 10, column=0, padx=5, pady=5)
+
+        # Création des frames et des canvas du jeu
+        for i in range(0, 3):
+            for j in range(0, 3):
+                cadre = Frame(self.frame_plateau, borderwidth=5, relief=GROOVE)
+                cadre.grid(row=i, column=j, padx=5, pady=5)
+                self.canvas_uplateau[i,j] = CanvasPlateau(cadre, self.partie.uplateau[i,j])
+                self.canvas_uplateau[i,j].grid()
+                # On lie un clic sur le Canvas à une méthode.
+                self.canvas_uplateau[i,j].bind('<Button-1>', self.selectionner)
